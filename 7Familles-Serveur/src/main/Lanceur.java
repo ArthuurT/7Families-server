@@ -14,7 +14,7 @@ public class Lanceur {
 		int port = Integer.parseInt(args[0]);
 		System.setProperty(
 			"java.security.policy",
-			"file:///home/asao/eclipse-workspace/7Familles-Serveur/src/security.policy");
+			"file:///home/asao/Documents/Universite/Semestre9/Middlewares/7Families/7Families-server/7Familles-Serveur/src/security.policy");
 		if (System.getSecurityManager() == null) {
 		    System.setSecurityManager(new SecurityManager());
 		}

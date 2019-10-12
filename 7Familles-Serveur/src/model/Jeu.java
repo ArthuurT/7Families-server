@@ -53,7 +53,30 @@ public class Jeu extends UnicastRemoteObject implements IJeu {
 		this.initMains();
 	}
 	
-	public synchronized void enregistrer(IJoueur joueur) throws GameFullException, InterruptedException, 
+	public synchronized void rejoindre(IJoueur joueur) throws GameFullException, RemoteException {
+		if (this.complet()) {
+			throw new GameFullException("The game is full... Try later !");
+		}
+		this.joueurs.add(joueur);
+		System.err.println(String.format("Joueurs : %d/%d", this.joueurs.size(), Jeu.MAX_CLIENT));
+		if (this.complet()) {
+			System.err.println("Initialisation");
+			try {
+				this.init();
+			} catch (EmptyStackException e) {
+				e.printStackTrace();
+			}
+			notifyAll();
+		} else {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/*public synchronized void enregistrer(IJoueur joueur) throws GameFullException, InterruptedException, 
 			RemoteException, EmptyStackException {
 		if (this.complet()) {
 			throw new GameFullException("The game is full... Try later !");
@@ -67,7 +90,7 @@ public class Jeu extends UnicastRemoteObject implements IJeu {
 		} else {
 			wait();
 		}
-	}
+	}*/
 
 	@Override
 	public synchronized void jouer(IJoueur joueur) throws RemoteException, InterruptedException {
@@ -77,7 +100,7 @@ public class Jeu extends UnicastRemoteObject implements IJeu {
 	}
 
 	@Override
-	public Carte piocher(Carte expected) throws RemoteException {
+	public Carte piocher(Famille famille, Statut statut) throws RemoteException {
 		// TODO Auto-generated method stub
 		return null;
 	}
