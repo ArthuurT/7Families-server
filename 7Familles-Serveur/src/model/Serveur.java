@@ -13,7 +13,7 @@ public class Serveur implements IServeur {
 	
 	public Serveur() {
 		try {
-			Jeu jeu = new Jeu();
+			Jeu jeu = new Jeu(2);
 			this.jeux.put("ALMA", jeu);
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -21,12 +21,12 @@ public class Serveur implements IServeur {
 	}
 	
 	@Override
-	public synchronized boolean creerJeu(String nom) {
+	public synchronized boolean creerJeu(String nom, int nbJoueurs) {
 		if (this.jeux.containsKey(nom)) {
 			return false;
 		}
 		try {
-			Jeu jeu = new Jeu();
+			Jeu jeu = new Jeu(nbJoueurs);
 			this.jeux.put(nom, jeu);
 			return true;
 		} catch (RemoteException e) {
