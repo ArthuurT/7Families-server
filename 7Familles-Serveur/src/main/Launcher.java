@@ -9,10 +9,10 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Properties;
 
-import model.Serveur;
-import remote.IServeur;
+import model.Server;
+import remote.IServer;
 
-public class Lanceur {
+public class Launcher {
 
 	public static void main(String[] args) {
 		try {
@@ -31,8 +31,8 @@ public class Lanceur {
 			int port = Integer.parseInt(properties.getProperty("server.port"));
 			String serverInterface = properties.getProperty("server.interface");
 			
-			IServeur serveur = new Serveur();
-			IServeur skeleton = (IServeur) UnicastRemoteObject.exportObject(serveur, 0);
+			IServer serveur = new Server();
+			IServer skeleton = (IServer) UnicastRemoteObject.exportObject(serveur, 0);
 			Registry registry = LocateRegistry.createRegistry(port);
 			registry.rebind(serverInterface, skeleton);
 			
