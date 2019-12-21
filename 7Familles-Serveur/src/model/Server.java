@@ -6,6 +6,7 @@ import java.rmi.UnexpectedException;
 import remote.IGame;
 import remote.IPlayer;
 import remote.IServer;
+import remote.IBoundedBuffer;
 
 public class Server implements IServer {
 		
@@ -15,8 +16,9 @@ public class Server implements IServer {
 	private GameBuilder fivePlayersGame = new GameBuilder(5);
 	private GameBuilder sixPlayersGame = new GameBuilder(6);
 	
-	public IGame searchGame(int capacity, IPlayer player) throws IllegalArgumentException, UnexpectedException, RemoteException, InterruptedException {
+	public IGame searchGame(int capacity, IPlayer iPlayer, IBoundedBuffer iTampon) throws IllegalArgumentException, UnexpectedException, RemoteException, InterruptedException {
 		System.out.println(String.format("Looking for a %d players game", capacity));
+		Player player = new Player(iPlayer, iTampon);
 		switch (capacity) {
 		case 2:
 			return this.twoPlayersGame.waitForPlayers(player);

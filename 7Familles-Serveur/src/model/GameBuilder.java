@@ -8,12 +8,17 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import remote.IPlayer;
-
+/**
+ * 
+ * This class is used to create new game instances. Players are put in a waiting list
+ * until the require number of players is reached. Then a new game instance is created
+ * and the waiting list is cleared.
+ * 
+ */
 public class GameBuilder {
 
-	private int capacity;
-	private List<IPlayer> players;
+	private int capacity; // require number of players to create a new game instance
+	private List<Player> players; // waiting list
 	
 	private Lock lock;
 	private Condition enoughPlayer;
@@ -21,18 +26,18 @@ public class GameBuilder {
 	private int waitingPlayersCount;
 	
 	private Game game;
-	private boolean gameAvailable;
+	private boolean gameAvailable; // used to indicate if an error occurred during the game initialization
 	
 	public GameBuilder(int capacity) {
 		this.capacity = capacity;
-		this.players = new ArrayList<IPlayer>();
+		this.players = new ArrayList<Player>();
 		this.lock = new ReentrantLock();
 		this.enoughPlayer = this.lock.newCondition();
 		this.waitingPlayersCount = 0;
 		this.gameAvailable = false;
 	}
 	
-	public Game waitForPlayers(IPlayer player) throws RemoteException, InterruptedException, UnexpectedException {
+	public Game waitForPlayers(Player player) throws RemoteException, InterruptedException, UnexpectedException {
 		this.lock.lock();
 		this.players.add(player);
 		this.waitingPlayersCount++;
@@ -43,7 +48,9 @@ public class GameBuilder {
 				this.game = new Game(this.players, this.capacity);
 			} catch (RemoteException | InterruptedException exception) {
 				System.out.println("Erreur ! On vire tout le monde !");
-				this.enoughPlayer.signalAll();
+				this.waitingPlayersCount = 0;
+				this.players.clear();
+				this.enoughPlayer.signalAll(); 
 				this.lock.unlock();
 				throw exception;
 			}
@@ -64,19 +71,20 @@ public class GameBuilder {
 				this.lock.unlock();
 				throw exception;
 			}
-			System.out.println("Je rejoinds la partie !");
-			this.waitingPlayersCount--;
 			if (!this.gameAvailable) {
 				this.lock.unlock();
-				throw new UnexpectedException("An error occured during game initialization");
+				throw new UnexpectedException("An error occurred during game initialization");
+			} else {
+				System.out.println("Je rejoinds la partie !");
+				this.waitingPlayersCount--;
+				if (this.waitingPlayersCount == 0) {
+					System.out.println("JE SUIS LE DERNIER A PARTIR");
+					this.gameAvailable = false;
+					this.players.clear();
+				}
+				this.lock.unlock();
+				return this.game;
 			}
-			if (this.waitingPlayersCount == 0) {
-				System.out.println("JE SUIS LE DERNIER A PARTIR");
-				this.gameAvailable = false;
-				this.players.clear();
-			}
-			this.lock.unlock();
-			return this.game;
 		}
 	}
 }
